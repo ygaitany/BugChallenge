@@ -1,0 +1,76 @@
+import time
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+
+class TestDefaultSuite():
+
+  def setup_method(self, method):
+    self.driver = webdriver.Chrome()
+    self.vars = {}
+  
+  def teardown_method(self, method):
+    self.driver.quit()
+  
+  def test_main(self):
+    self.driver.get("https://wmxrwq14uc.execute-api.us-east-1.amazonaws.com/Prod/Account/Login")
+    self.driver.find_element(By.ID, "Username").send_keys("TestUser76")
+    self.driver.find_element(By.ID, "Password").send_keys("/GHr*Ub;CjCn")
+    self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
+    time.sleep(2)
+
+    self.TestEmployeeCountAfterAddWithZeroDependents()
+    self.TestAddEmployeeFailsBecauseMoreThanMaxDependents()
+    self.TestAddAmployeeCountAfterAddWithMaxDependents()
+    self.TestDeleteEmployee()
+    #return
+    #self.TestAddEmployeeWithSpecialCharacters()
+
+
+
+  def TestAddEmployeeFailsBecauseMoreThanMaxDependents(self):
+    table = self.driver.find_element(By.ID, "employeesTable")
+    count_before_add = len(table.find_elements_by_tag_name("tr"))
+    self.addEmployee("Max", "Dependents", "33")
+    time.sleep(3)
+    count_after_add = len(table.find_elements_by_tag_name("tr"))
+    assert count_after_add == count_before_add
+    self.driver.find_element_by_xpath("//button[contains(.,'Cancel')]").click()
+
+  def TestEmployeeCountAfterAddWithZeroDependents(self):
+    table = self.driver.find_element(By.ID, "employeesTable")
+    count_before_add = len(table.find_elements_by_tag_name("tr"))
+    self.addEmployee("First Name", "Last Name", "0")
+    time.sleep(3)
+    count_after_add = len(table.find_elements_by_tag_name("tr"))
+    assert count_after_add == (count_before_add + 1)
+
+  def addEmployee(self, first, last, dep):
+    self.driver.find_element(By.ID, "add").click()
+    self.driver.find_element(By.ID, "firstName").send_keys(first)
+    self.driver.find_element(By.ID, "lastName").send_keys(last)
+    self.driver.find_element(By.ID, "dependants").send_keys(dep)
+    self.driver.find_element(By.ID, "addEmployee").click()
+
+  def TestAddAmployeeCountAfterAddWithMaxDependents(self):
+    table = self.driver.find_element(By.ID, "employeesTable")
+    count_before_add = len(table.find_elements_by_tag_name("tr"))
+    self.addEmployee("Max", "Dependents", "32")
+    time.sleep(3)
+    count_after_add = len(table.find_elements_by_tag_name("tr"))
+    assert count_after_add == (count_before_add + 1)
+
+  def TestDeleteEmployee(self):
+    self.driver.find_element(By.CSS_SELECTOR, "tr:nth-child(1) .fa-times").click()
+    self.driver.find_element(By.ID, "deleteEmployee").click()
+    table = self.driver.find_element(By.ID, "employeesTable")
+    count_before_add = len(table.find_elements_by_tag_name("tr"))
+
+
+  def TestAddEmployeeWithSpecialCharacters(self):
+    table = self.driver.find_element(By.ID, "employeesTable")
+    count_before_add = len(table.find_elements_by_tag_name("tr"))
+    self.addEmployee("a", "!!!", "0")
+    time.sleep(4)
+    count_after_add = len(table.find_elements_by_tag_name("tr"))
+    assert count_after_add == (count_before_add + 1)
+  
